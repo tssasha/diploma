@@ -1,6 +1,6 @@
 # graduate
 
-use new_news.json
+put new_news.json file to db directory
 
 ## Steps:
 
