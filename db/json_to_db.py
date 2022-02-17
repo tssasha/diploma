@@ -1,9 +1,9 @@
 import json
 from bson.json_util import dumps
-import psycopg2
 import pandas as pd
 from sqlalchemy import create_engine
 from bson import ObjectId
+from db.db_tools import get_session
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -25,19 +25,18 @@ def parse_json():
 
 
 def create_table():
-    conn = psycopg2.connect(
-        database="postgres", user='postgres',
-        password='example', host='localhost', port='5432'
-    )
-    cursor = conn.cursor()
-    with open('schema.sql') as f:
-        cursor.execute(f.read())
-    conn.commit()
-    conn.close()
+    with get_session() as cursor:
+        with open('schema.sql') as f:
+            cursor.execute(f.read())
+        with open('news_id.sql') as f:
+            cursor.execute(f.read())
+
+
+def fill_table():
+    df = pd.DataFrame(parse_json())
+    engine = create_engine("postgresql+psycopg2://postgres:example@localhost:5432/postgres")
+    df.to_sql("news", engine, index=False, if_exists='append')
 
 
 create_table()
-df = pd.DataFrame(parse_json())
-engine = create_engine("postgresql+psycopg2://postgres:example@localhost:5432/postgres")
-df.to_sql("news", engine, index=False, if_exists='append')
-print("Done")
+fill_table()
