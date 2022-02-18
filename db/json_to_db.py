@@ -3,7 +3,7 @@ from bson.json_util import dumps
 import pandas as pd
 from sqlalchemy import create_engine
 from bson import ObjectId
-from db.db_tools import get_session
+from db.db_tools import get_cursor
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -25,7 +25,7 @@ def parse_json():
 
 
 def create_table():
-    with get_session() as cursor:
+    with get_cursor() as cursor:
         with open('schema.sql') as f:
             cursor.execute(f.read())
         with open('news_id.sql') as f:
