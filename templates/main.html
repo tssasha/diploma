@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>Diploma</title>
+<body>
+    <form action="/clusterize_one/" method="post">
+        <input type="submit" value="Clusterize one new">
+    </form>
+    {% if news_title %}
+        <h1>{{news_title}}</h1>
+    {% endif %}
+    {% if result %}
+        <h1>Номер сюжета: {{result}}</h1>
+    {% endif %}
+    {% if news_id %}
+        <p>Номер новости: {{news_id}}</p>
+    {% endif %}
+</body>
+</html>
