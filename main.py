@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template
 from clusterer import Clusterer
 from db.db_tools import select_by_id
 
