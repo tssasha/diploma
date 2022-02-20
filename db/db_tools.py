@@ -17,10 +17,10 @@ def get_cursor():
             raise
 
 
-def select_to_df(sql):
+def select_to_df(start, end):
     with psycopg2.connect(database="postgres", user='postgres', password='example', host='localhost',
                           port='5432') as conn:
-        return pd.read_sql_query(sql, conn)
+        return pd.read_sql_query('select * from news where id >= %s and id < %s', conn, params=[start, end])
 
 
 def select_by_id(news_id):

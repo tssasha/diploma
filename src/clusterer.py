@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from db.db_tools import select_to_df, select_by_id
 import numpy as np
 from scipy import spatial
+import configparser
 
 
 def lemmas(lst):
@@ -20,16 +21,18 @@ def cscore(cluster_mtx, doc_mtx):
 
 class Clusterer:
     nlp = spacy.load("ru_core_news_sm")
+    config = configparser.ConfigParser()
+    config.read('config_params.ini')
+    dict_size = config['dict'].getint('dict_size')
 
     def __init__(self):
-        self.cur_id = 1
+        self.cur_id = max(self.config['DEFAULT'].getint('start_news_id') - 1, self.dict_size)
         self.fitted_dicts = None
         self.clusters = None
         self.generate_dicts()
 
     def generate_dicts(self):
-        df = select_to_df('select * from news where id >= 1 and id <= 100')
-        self.cur_id = 100
+        df = select_to_df(self.cur_id + 1 - self.dict_size, self.cur_id + 1)
         tokens_df = pd.DataFrame()
         tokens_df['title_nlp'] = df['title'].map(self.nlp)
         tokens_df['body_nlp'] = df['text'].map(self.nlp)
@@ -81,4 +84,3 @@ class Clusterer:
             self.clusters[cl_arg][0][i] = (cur_cluster[0][i] * cl_size + mtx[i]) / (cl_size + 1)
         self.clusters[cl_arg][1].append(self.cur_id)
         return cl_arg
-
