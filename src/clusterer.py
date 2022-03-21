@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -5,6 +6,7 @@ from db.db_tools import select_to_df, select_by_id
 import numpy as np
 from scipy import spatial
 import configparser
+import logging
 
 
 def lemmas(lst):
@@ -19,19 +21,25 @@ def cscore(cluster_mtx, doc_mtx):
     return sum(1 - spatial.distance.cosine(cluster_mtx[i], doc_mtx[i]) for i in range(9))
 
 
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
+
 class Clusterer:
     nlp = spacy.load("ru_core_news_sm")
     config = configparser.ConfigParser()
     config.read('config_params.ini')
     dict_size = config['dict'].getint('dict_size')
+    start_id = max(config['DEFAULT'].getint('start_news_id') - 1, dict_size)
+    dict_update_freq = config['dict'].getint('dict_update_freq')
 
     def __init__(self):
-        self.cur_id = max(self.config['DEFAULT'].getint('start_news_id') - 1, self.dict_size)
+        self.cur_id = self.start_id
         self.fitted_dicts = None
         self.clusters = None
         self.generate_dicts()
 
     def generate_dicts(self):
+        logging.info("Dictionary generation in progress...")
         df = select_to_df(self.cur_id + 1 - self.dict_size, self.cur_id + 1)
         tokens_df = pd.DataFrame()
         tokens_df['title_nlp'] = df['title'].map(self.nlp)
@@ -53,8 +61,11 @@ class Clusterer:
                              TfidfVectorizer().fit(tokens_df['t_tokens'] + ' ' + tokens_df['b_tokens']),
                              TfidfVectorizer().fit(tokens_df['t_lemmas'] + ' ' + tokens_df['b_lemmas']),
                              TfidfVectorizer().fit(tokens_df['t_entities'] + ' ' + tokens_df['b_entities'])]
+        logging.info("Dictionary generated")
 
     def clusterize_one(self):
+        if self.cur_id != self.start_id and (self.cur_id - self.start_id) % self.dict_update_freq == 0:
+            self.generate_dicts()
         self.cur_id += 1
         row = select_by_id(self.cur_id)
         title = self.nlp(row['title'])
@@ -64,7 +75,7 @@ class Clusterer:
                row['text'], lemmas(body), entities(body),
                row['title'] + ' ' + row['text'], lemmas(title_body), entities(title_body)]
 
-        mtx = [self.fitted_dicts[j].transform([doc[j]]).toarray().flatten() for j in range(9)]
+        mtx = [self.fitted_dicts[j].transform([doc[j]]) for j in range(9)]  #
 
         if self.clusters is None:
             self.clusters = [(mtx, [self.cur_id])]

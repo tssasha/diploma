@@ -7,3 +7,6 @@ For the first time:
 
 
 run main.py (it will take some time to generate dict)
+
+git lfs install
+git clone https://huggingface.co/DeepPavlov/rubert-base-cased
