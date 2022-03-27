@@ -1,12 +1,14 @@
 import sys
 import pandas as pd
 import spacy
+import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
 from db.db_tools import select_to_df, select_by_id
 import numpy as np
 from scipy import spatial
 import configparser
 import logging
+from src.sentence_bert import SentenceBert
 
 
 def lemmas(lst):
@@ -31,6 +33,7 @@ class Clusterer:
     dict_size = config['dict'].getint('dict_size')
     start_id = max(config['DEFAULT'].getint('start_news_id') - 1, dict_size)
     dict_update_freq = config['dict'].getint('dict_update_freq')
+    is_bert = config['DEFAULT'].getboolean('using_bert')
 
     def __init__(self):
         self.cur_id = self.start_id
@@ -75,17 +78,34 @@ class Clusterer:
                row['text'], lemmas(body), entities(body),
                row['title'] + ' ' + row['text'], lemmas(title_body), entities(title_body)]
 
-        mtx = [self.fitted_dicts[j].transform([doc[j]]) for j in range(9)]  #
+        mtx = [self.fitted_dicts[j].transform([doc[j]]).toarray().flatten() for j in range(9)]
+
+        sentence_bert = None
+        if self.is_bert:
+            sentence_bert = SentenceBert(row['text'])
 
         if self.clusters is None:
             self.clusters = [(mtx, [self.cur_id])]
+            if self.is_bert:
+                self.clusters = [(mtx, [self.cur_id], sentence_bert.new_tokens)]
             return 0
 
         cscores = [cscore(cluster[0], mtx) for cluster in self.clusters]
+        if self.is_bert:
+            for i in range(len(cscores)):
+                cscores[i] += sentence_bert.cosine_similarity(self.clusters[i][2])
         max_cscore = np.max(cscores)
+        print(max_cscore)
 
-        if max_cscore < 1.5:
-            self.clusters.append((mtx, [self.cur_id]))
+        if self.is_bert:
+            clustering_param = self.config['DEFAULT'].getfloat('bert_clustering_param')
+        else:
+            clustering_param = self.config['DEFAULT'].getfloat('no_bert_clustering_param')
+        if max_cscore < clustering_param:
+            if self.is_bert:
+                self.clusters.append((mtx, [self.cur_id], sentence_bert.new_tokens))
+            else:
+                self.clusters.append((mtx, [self.cur_id]))
             return len(self.clusters) - 1
 
         cl_arg = np.argmax(cscores)
@@ -94,4 +114,7 @@ class Clusterer:
         for i in range(9):
             self.clusters[cl_arg][0][i] = (cur_cluster[0][i] * cl_size + mtx[i]) / (cl_size + 1)
         self.clusters[cl_arg][1].append(self.cur_id)
+        if self.is_bert:
+            torch.cat((self.clusters[cl_arg][2]['input_ids'], sentence_bert.new_tokens['input_ids']), 0)
+            torch.cat((self.clusters[cl_arg][2]['attention_mask'], sentence_bert.new_tokens['attention_mask']), 0)
         return cl_arg

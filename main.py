@@ -14,7 +14,10 @@ def index():
 def clusterize_one():
     ans = clusterer.clusterize_one()
     news_title = select_by_id(clusterer.cur_id)['title']
-    return render_template("main.html", news_id=clusterer.cur_id, news_title=news_title, result=str(ans))
+    cluster_news = []
+    for id in clusterer.clusters[ans][1]:
+        cluster_news.append(select_by_id(id)['title'])
+    return render_template("main.html", news_id=clusterer.cur_id, news_title=news_title, result=str(ans), cluster_news=cluster_news)
 
 
 if __name__ == '__main__':
