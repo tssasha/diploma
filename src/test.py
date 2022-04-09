@@ -1,11 +1,9 @@
 from time import time
 from db.db_tools import select_to_df
 from src.clusterer import Clusterer
-import configparser
 from sklearn.metrics.cluster import v_measure_score
 from sklearn import metrics
 
-parser = configparser.ConfigParser()
 test_size = 100
 
 

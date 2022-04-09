@@ -1,3 +1,5 @@
+import os
+import pickle
 import sys
 import pandas as pd
 import spacy
@@ -42,8 +44,19 @@ class Clusterer:
         self.generate_dicts()
 
     def generate_dicts(self):
+        directory = 'generated_dicts'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        start = self.cur_id + 1 - self.dict_size
+        end = self.cur_id + 1
+        file_path = f'{directory}/{start}_{end}.pk'
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                self.fitted_dicts = pickle.load(f)
+                return
+
         logging.info("Dictionary generation in progress...")
-        df = select_to_df(self.cur_id + 1 - self.dict_size, self.cur_id + 1)
+        df = select_to_df(start, end)
         tokens_df = pd.DataFrame()
         tokens_df['title_nlp'] = df['title'].map(self.nlp)
         tokens_df['body_nlp'] = df['text'].map(self.nlp)
@@ -65,6 +78,9 @@ class Clusterer:
                              TfidfVectorizer().fit(tokens_df['t_lemmas'] + ' ' + tokens_df['b_lemmas']),
                              TfidfVectorizer().fit(tokens_df['t_entities'] + ' ' + tokens_df['b_entities'])]
         logging.info("Dictionary generated")
+
+        with open(file_path, 'wb') as f:
+            pickle.dump(self.fitted_dicts, f)
 
     def clusterize_one(self):
         if self.cur_id != self.start_id and (self.cur_id - self.start_id) % self.dict_update_freq == 0:
