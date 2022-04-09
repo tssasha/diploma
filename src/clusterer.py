@@ -5,7 +5,7 @@ import pandas as pd
 import spacy
 import torch
 from sklearn.feature_extraction.text import TfidfVectorizer
-from db.db_tools import select_to_df, select_by_id
+from db.db_tools import select_to_df
 import numpy as np
 from scipy import spatial
 import configparser
@@ -41,6 +41,7 @@ class Clusterer:
         self.cur_id = self.start_id
         self.fitted_dicts = None
         self.clusters = None
+        self.news_segment = None
         self.generate_dicts()
 
     def generate_dicts(self):
@@ -83,10 +84,13 @@ class Clusterer:
             pickle.dump(self.fitted_dicts, f)
 
     def clusterize_one(self):
-        if self.cur_id != self.start_id and (self.cur_id - self.start_id) % self.dict_update_freq == 0:
+        count = self.cur_id - self.start_id
+        if self.cur_id != self.start_id and count % self.dict_update_freq == 0:
             self.generate_dicts()
+        if count % 100 == 0:
+            self.news_segment = select_to_df(self.cur_id, self.cur_id + 100).to_dict('records')
         self.cur_id += 1
-        row = select_by_id(self.cur_id)
+        row = self.news_segment[count % 100]
         title = self.nlp(row['title'])
         body = self.nlp(row['text'])
         title_body = self.nlp(row['title'] + ' ' + row['text'])

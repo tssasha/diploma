@@ -13,13 +13,12 @@
     {% endif %}
     {% if news_id %}
         <p>Номер новости: {{news_id}}</p>
+        <h2>Все новости сюжета:</h2>
+        <ul>
+            {% for attr in cluster_news %}
+            <li>{{attr}}</li>
+            {% endfor %}
+        </ul>
     {% endif %}
-
-    <h2>Все новости сюжета:</h2>
-    <ul>
-      {% for attr in cluster_news %}
-      <li>{{attr}}</li>
-      {% endfor %}
-    </ul>
 </body>
 </html>
