@@ -95,7 +95,6 @@ class Clusterer:
             for i in range(len(cscores)):
                 cscores[i] += sentence_bert.cosine_similarity(self.clusters[i][2])
         max_cscore = np.max(cscores)
-        print(max_cscore)
 
         if self.is_bert:
             clustering_param = self.config['DEFAULT'].getfloat('bert_clustering_param')
