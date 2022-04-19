@@ -46,12 +46,12 @@ class Clusterer:
         self.generate_dicts()
 
     def generate_dicts(self):
-        directory = 'generated_dicts'
+        directory = join('src', 'generated_dicts')
         if not os.path.exists(directory):
             os.makedirs(directory)
         start = self.cur_id + 1 - self.dict_size
         end = self.cur_id + 1
-        file_path = f'{directory}/{start}_{end}.pk'
+        file_path = join(f'{directory}', f'{start}_{end}.pk')
         if os.path.exists(file_path):
             with open(file_path, 'rb') as f:
                 self.fitted_dicts = pickle.load(f)

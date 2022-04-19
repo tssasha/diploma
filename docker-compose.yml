@@ -33,6 +33,7 @@ services:
     environment:
       PYTHONPATH: .
     command: python src/main.py
+    volumes:
+      - ./src/generated_dicts/:/app/src/generated_dicts/
     links:
       - db
-
