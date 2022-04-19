@@ -4,7 +4,8 @@ from src.clusterer import Clusterer
 from sklearn.metrics.cluster import v_measure_score
 from sklearn import metrics
 
-test_size = 1000
+test_size = 100
+iterations = 1
 
 
 def func(x):
@@ -19,8 +20,8 @@ avg_adjusted_mutual_info_score = 0
 
 all_time = 0
 
-for i in range(10):
-    start = (i + 1) * 10000 + i * test_size
+for i in range(iterations):
+    start = i * 100000 + 10000
     df = select_to_df(start, start + test_size)
     grouped = df.groupby('story_url').apply(func)
 
@@ -37,7 +38,7 @@ for i in range(10):
     pred_time = time()
     for j in range(test_size):
         clusterer.clusterize_one()
-        if j % 10 == 0:
+        if j % (test_size / 10) == 0:
             all_time += time() - pred_time
             print('%s : %s' % (j, time() - pred_time))
             pred_time = time()
@@ -49,15 +50,27 @@ for i in range(10):
             predicted_clusters[x - start - 1] = k
         k += 1
 
-    avg_v_measure_score += v_measure_score(correct_clusters, predicted_clusters)
-    avg_homogeneity_score += metrics.homogeneity_score(correct_clusters, predicted_clusters)
-    avg_completeness_score += metrics.completeness_score(correct_clusters, predicted_clusters)
-    avg_adjusted_rand_score += metrics.adjusted_rand_score(correct_clusters, predicted_clusters)
-    avg_adjusted_mutual_info_score += metrics.adjusted_mutual_info_score(correct_clusters, predicted_clusters)
+    vmeasure_score = v_measure_score(correct_clusters, predicted_clusters)
+    homogeneity_score = metrics.homogeneity_score(correct_clusters, predicted_clusters)
+    completeness_score = metrics.completeness_score(correct_clusters, predicted_clusters)
+    adjusted_rand_score = metrics.adjusted_rand_score(correct_clusters, predicted_clusters)
+    adjusted_mutual_info_score = metrics.adjusted_mutual_info_score(correct_clusters, predicted_clusters)
 
-print('v_measure_score:', avg_v_measure_score / 10)
-print('homogeneity_score:', avg_homogeneity_score / 10)
-print('completeness_score:', avg_completeness_score / 10)
-print('adjusted_rand_score:', avg_adjusted_rand_score / 10)
-print('adjusted_mutual_info_score:', avg_adjusted_mutual_info_score / 10)
-print('time for clusterize_one : ', all_time / test_size / 10)
+    print('v_measure_score: ', vmeasure_score)
+    print('homogeneity_score: ', homogeneity_score)
+    print('completeness_score: ', completeness_score)
+    print('adjusted_rand_score: ', adjusted_rand_score)
+    print('adjusted_mutual_info_score: ', adjusted_mutual_info_score)
+
+    avg_v_measure_score += vmeasure_score
+    avg_homogeneity_score += homogeneity_score
+    avg_completeness_score += completeness_score
+    avg_adjusted_rand_score += adjusted_rand_score
+    avg_adjusted_mutual_info_score += adjusted_mutual_info_score
+
+print('avg_v_measure_score:', avg_v_measure_score / iterations)
+print('avg_homogeneity_score:', avg_homogeneity_score / iterations)
+print('avg_completeness_score:', avg_completeness_score / iterations)
+print('avg_adjusted_rand_score:', avg_adjusted_rand_score / iterations)
+print('avg_adjusted_mutual_info_score:', avg_adjusted_mutual_info_score / iterations)
+print('time for clusterize_one : ', all_time / test_size / iterations)
