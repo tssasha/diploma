@@ -1,12 +1,38 @@
 version: '3.1'
 
 services:
-
   db:
     image: postgres:latest
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5432" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  migrate:
+    image: app:latest
+    environment:
+      PYTHONPATH: .
+    command: python db/json_to_db.py
+    depends_on:
+      - db
+    links:
+      - db
+    restart: "no"
+
+  app:
+    image: app:latest
     ports:
-      - "5432:5432"
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      PYTHONPATH: .
+    command: python src/main.py
+    links:
+      - db
+

@@ -1,6 +1,8 @@
 import os
 import pickle
 import sys
+from os.path import join
+
 import pandas as pd
 import spacy
 import torch
@@ -10,7 +12,6 @@ import numpy as np
 from scipy import spatial
 import configparser
 import logging
-from src.sentence_bert import SentenceBert
 
 
 def lemmas(lst):
@@ -31,7 +32,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 class Clusterer:
     nlp = spacy.load("ru_core_news_sm")
     config = configparser.ConfigParser()
-    config.read('config_params.ini')
+    config.read(join('src', 'config_params.ini'))
     dict_size = config['dict'].getint('dict_size')
     start_id = max(config['DEFAULT'].getint('start_news_id') - 1, dict_size)
     dict_update_freq = config['dict'].getint('dict_update_freq')
@@ -102,6 +103,7 @@ class Clusterer:
 
         sentence_bert = None
         if self.is_bert:
+            from src.sentence_bert import SentenceBert
             sentence_bert = SentenceBert(row['text'])
 
         if self.clusters is None:

@@ -6,7 +6,7 @@ import psycopg2.extras
 
 @contextmanager
 def get_cursor():
-    with psycopg2.connect(database="postgres", user='postgres', password='example', host='localhost',
+    with psycopg2.connect(database="postgres", user='postgres', password='example', host='db',
                           port='5432') as conn:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         try:
@@ -18,7 +18,7 @@ def get_cursor():
 
 
 def select_to_df(start, end):
-    with psycopg2.connect(database="postgres", user='postgres', password='example', host='localhost',
+    with psycopg2.connect(database="postgres", user='postgres', password='example', host='db',
                           port='5432') as conn:
         return pd.read_sql_query('select * from news where id >= %s and id < %s order by id', conn, params=[start, end])
 

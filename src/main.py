@@ -1,8 +1,12 @@
+import os
+from os.path import join
+
 from flask import Flask, render_template
 from src.clusterer import Clusterer
 from db.db_tools import select_by_id
 
-app = Flask(__name__)
+template_dir = os.path.abspath(join('src', 'templates'))
+app = Flask(__name__, template_folder=template_dir)
 
 
 @app.route('/')
@@ -22,4 +26,4 @@ def clusterize_one():
 
 if __name__ == '__main__':
     clusterer = Clusterer()
-    app.run(host='127.0.0.1', port=8000)
+    app.run(host='0.0.0.0', port=8000)
