@@ -38,13 +38,25 @@ services:
     links:
       - db
 
-  ccm:
+  ccm_test:
     image: app:latest
     depends_on:
       - db
     environment:
       PYTHONPATH: .
     command: python src/cluster_creation_model.py
+    volumes:
+      - ./src/generated_dicts/:/app/src/generated_dicts/
+    links:
+      - db
+
+  clusterer_test:
+    image: app:latest
+    depends_on:
+      - db
+    environment:
+      PYTHONPATH: .
+    command: python src/test.py
     volumes:
       - ./src/generated_dicts/:/app/src/generated_dicts/
     links:

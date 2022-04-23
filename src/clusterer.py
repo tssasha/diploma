@@ -136,7 +136,6 @@ class Clusterer:
         cl_arg = np.argmax(cscores)
         max_metrix = metrix[cl_arg]
         ans = self.cc_model.predict([max_metrix])[0]
-        print(ans, np.max(cscores), max_metrix)
         if ans == 1:
             if self.is_bert:
                 self.clusters.append((mtx, [self.cur_id], sentence_bert.new_tokens))

@@ -9,8 +9,8 @@ from db.db_tools import select_to_df
 from src.clusterer import Clusterer
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-train_start = 10000
-train_corpus_size = 200
+train_start = 510000
+train_corpus_size = 100
 reserve_size = 1
 
 
