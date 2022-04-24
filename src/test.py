@@ -62,11 +62,11 @@ if __name__ == '__main__':
         adjusted_rand_score = metrics.adjusted_rand_score(correct_clusters, predicted_clusters)
         adjusted_mutual_info_score = metrics.adjusted_mutual_info_score(correct_clusters, predicted_clusters)
 
-        logging.info('v_measure_score: ', vmeasure_score)
-        logging.info('homogeneity_score: ', homogeneity_score)
-        logging.info('completeness_score: ', completeness_score)
-        logging.info('adjusted_rand_score: ', adjusted_rand_score)
-        logging.info('adjusted_mutual_info_score: ', adjusted_mutual_info_score)
+        logging.info('v_measure_score: %s' % vmeasure_score)
+        logging.info('homogeneity_score: %s' % homogeneity_score)
+        logging.info('completeness_score: %s' % completeness_score)
+        logging.info('adjusted_rand_score: %s' % adjusted_rand_score)
+        logging.info('adjusted_mutual_info_score: %s' % adjusted_mutual_info_score)
 
         avg_v_measure_score += vmeasure_score
         avg_homogeneity_score += homogeneity_score
@@ -74,9 +74,9 @@ if __name__ == '__main__':
         avg_adjusted_rand_score += adjusted_rand_score
         avg_adjusted_mutual_info_score += adjusted_mutual_info_score
 
-    logging.info('avg_v_measure_score:', avg_v_measure_score / iterations)
-    logging.info('avg_homogeneity_score:', avg_homogeneity_score / iterations)
-    logging.info('avg_completeness_score:', avg_completeness_score / iterations)
-    logging.info('avg_adjusted_rand_score:', avg_adjusted_rand_score / iterations)
-    logging.info('avg_adjusted_mutual_info_score:', avg_adjusted_mutual_info_score / iterations)
-    logging.info('time for clusterize_one : ', all_time / test_size / iterations)
+    logging.info('avg_v_measure_score: %s' % (avg_v_measure_score / iterations))
+    logging.info('avg_homogeneity_score: %s' % (avg_homogeneity_score / iterations))
+    logging.info('avg_completeness_score: %s' % (avg_completeness_score / iterations))
+    logging.info('avg_adjusted_rand_score: %s' % (avg_adjusted_rand_score / iterations))
+    logging.info('avg_adjusted_mutual_info_score: %s' % (avg_adjusted_mutual_info_score / iterations))
+    logging.info('time for clusterize_one: %s' % (all_time / test_size / iterations))
