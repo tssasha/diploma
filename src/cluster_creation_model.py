@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier as RFC
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 
@@ -10,7 +10,7 @@ from src.clusterer import Clusterer
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 train_start = 510000
-train_corpus_size = 100
+train_corpus_size = 1000
 reserve_size = 1
 
 
@@ -20,7 +20,7 @@ def func(x):
 
 def generate_corpus():
     df = select_to_df(train_start + 1, train_start + 1 + reserve_size + train_corpus_size)
-    clusterer = Clusterer(10000, train_start, True)
+    clusterer = Clusterer(dict_size=10000, start_id=train_start, for_ccm_creation=True)
 
     available_clusters = []
     y = []
@@ -44,11 +44,13 @@ def generate_corpus():
             x.append(clusterer.clusterize_one_for_ccm(len(available_clusters)))
             available_clusters.append(story_url)
 
-    return train_test_split(x, y, test_size=0.2, random_state=0)
+    return train_test_split(x, y, test_size=0.5, random_state=0)
 
 
 def fit_model(x, y):
-    return LogisticRegression(solver='lbfgs', random_state=0).fit(x, y)
+    rfc = RFC()
+    rfc.fit(x, y)
+    return rfc
 
 
 def create_model():

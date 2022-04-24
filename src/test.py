@@ -1,9 +1,13 @@
+import logging
+import sys
 from time import time
 from db.db_tools import select_to_df
+from src.cluster_creation_model import create_model
 from src.clusterer import Clusterer
 from sklearn.metrics.cluster import v_measure_score
 from sklearn import metrics
 
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 test_size = 1000
 iterations = 10
 
@@ -20,6 +24,7 @@ if __name__ == '__main__':
     avg_adjusted_mutual_info_score = 0
 
     all_time = 0
+    cc_model = create_model()
 
     for i in range(iterations):
         dict_size = 10000
@@ -34,7 +39,7 @@ if __name__ == '__main__':
                 correct_clusters[x] = k
             k += 1
 
-        clusterer = Clusterer(dict_size, start - 1)
+        clusterer = Clusterer(dict_size=dict_size, start_id=start - 1, cc_model=cc_model)
 
         pred_time = time()
         for j in range(test_size):
@@ -57,11 +62,11 @@ if __name__ == '__main__':
         adjusted_rand_score = metrics.adjusted_rand_score(correct_clusters, predicted_clusters)
         adjusted_mutual_info_score = metrics.adjusted_mutual_info_score(correct_clusters, predicted_clusters)
 
-        print('v_measure_score: ', vmeasure_score)
-        print('homogeneity_score: ', homogeneity_score)
-        print('completeness_score: ', completeness_score)
-        print('adjusted_rand_score: ', adjusted_rand_score)
-        print('adjusted_mutual_info_score: ', adjusted_mutual_info_score)
+        logging.info('v_measure_score: ', vmeasure_score)
+        logging.info('homogeneity_score: ', homogeneity_score)
+        logging.info('completeness_score: ', completeness_score)
+        logging.info('adjusted_rand_score: ', adjusted_rand_score)
+        logging.info('adjusted_mutual_info_score: ', adjusted_mutual_info_score)
 
         avg_v_measure_score += vmeasure_score
         avg_homogeneity_score += homogeneity_score
@@ -69,9 +74,9 @@ if __name__ == '__main__':
         avg_adjusted_rand_score += adjusted_rand_score
         avg_adjusted_mutual_info_score += adjusted_mutual_info_score
 
-    print('avg_v_measure_score:', avg_v_measure_score / iterations)
-    print('avg_homogeneity_score:', avg_homogeneity_score / iterations)
-    print('avg_completeness_score:', avg_completeness_score / iterations)
-    print('avg_adjusted_rand_score:', avg_adjusted_rand_score / iterations)
-    print('avg_adjusted_mutual_info_score:', avg_adjusted_mutual_info_score / iterations)
-    print('time for clusterize_one : ', all_time / test_size / iterations)
+    logging.info('avg_v_measure_score:', avg_v_measure_score / iterations)
+    logging.info('avg_homogeneity_score:', avg_homogeneity_score / iterations)
+    logging.info('avg_completeness_score:', avg_completeness_score / iterations)
+    logging.info('avg_adjusted_rand_score:', avg_adjusted_rand_score / iterations)
+    logging.info('avg_adjusted_mutual_info_score:', avg_adjusted_mutual_info_score / iterations)
+    logging.info('time for clusterize_one : ', all_time / test_size / iterations)

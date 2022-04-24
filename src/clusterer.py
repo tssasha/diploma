@@ -36,7 +36,7 @@ class Clusterer:
     dict_size = config['dict'].getint('dict_size')
     start_id = max(config['DEFAULT'].getint('start_news_id') - 1, dict_size)
 
-    def __init__(self, dict_size=dict_size, start_id=start_id, for_ccm_creation=False):
+    def __init__(self, dict_size=dict_size, start_id=start_id, for_ccm_creation=False, cc_model=None):
         self.dict_size = dict_size
         self.start_id = start_id
         self.for_ccm_creation = for_ccm_creation
@@ -46,8 +46,11 @@ class Clusterer:
         self.news_segment = None
         self.generate_dicts()
         if not for_ccm_creation:
-            from src.cluster_creation_model import create_model
-            self.cc_model = create_model()
+            if cc_model:
+                self.cc_model = cc_model
+            else:
+                from src.cluster_creation_model import create_model
+                self.cc_model = create_model()
 
     def generate_dicts(self):
         directory = join('src', 'generated_dicts')
