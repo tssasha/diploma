@@ -1,4 +1,4 @@
-# graduate
+# Russian news stream event detection
 
 For the first time:
 - put new_news.json file to db directory
